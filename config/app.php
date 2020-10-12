@@ -18,7 +18,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Application Environment
-    |--------------------------------------------------------------------------
+    |--------------------------------------------F------------------------------
     |
     | This value determines the "environment" your application is currently
     | running in. This may determine how you prefer to configure various
@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Tokyo',
 
     /*
     |--------------------------------------------------------------------------
