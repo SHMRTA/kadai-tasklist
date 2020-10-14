@@ -44,7 +44,8 @@ class TasksController extends Controller
      */
      // postでtask/にアクセスされた場合の「新規登録処理」
     public function store(Request $request)
-    {   //バリテーション
+    {   
+        //バリテーション
         $request->validate([
             'status' => 'required|max:10',
             ]);
@@ -101,7 +102,8 @@ class TasksController extends Controller
      
      // putまたはpatchでtask/idにアクセスされた場合の「更新処理」
     public function update(Request $request, $id)
-    {   //バリテーション
+    {   
+        //バリテーション
         $request->validate([
             'status' => 'required|max:10',
             ]);
