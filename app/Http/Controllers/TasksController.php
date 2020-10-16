@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
 use App\Task;
 
@@ -13,9 +14,24 @@ class TasksController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {   
         //タスクを取得
         $task = Task::all();
+        
+        
+        // ログインしていたらタスク一覧を表示
+        if (\Auth::check()) {
+            
+            //↓loginControllerのログイン情報をログとして吐き出す
+            // logger(\Auth::user());
+            
+            return view('task.index',['task' => $task,]);
+        } else {
+            // ログインしていなかったらログイン画面を表示
+            return view('auth/login');
+        }
+        
+        
         
         //タスク一覧ビューでそれを表示
         return view('task.index',['task' => $task,]);
@@ -33,7 +49,7 @@ class TasksController extends Controller
         
         //タスク作成ビューを表示
         return view('task.create',['task' => $task,]);
-        
+    
     }
 
     /**
@@ -52,8 +68,19 @@ class TasksController extends Controller
     
         //タスクを作成
         $task = new Task;
+        
+        //↓が問題
+        //$task->user_id = $request->user_id;
+        
+        $usr_id = \Auth::user()->id;
+        $task->user_id =$usr_id;
+        
+        
         $task->status = $request->status;
         $task->content = $request->content;
+        
+        //logger($task);
+        
         $task->save();
         
         //トップページへリダイレクトさせる
