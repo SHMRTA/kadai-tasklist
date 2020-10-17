@@ -26,6 +26,7 @@ class TasksController extends Controller
             // logger(\Auth::user());
             
             return view('task.index',['task' => $task,]);
+            
         } else {
             // ログインしていなかったらログイン画面を表示
             return view('auth/login');
@@ -58,6 +59,7 @@ class TasksController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+     
      // postでtask/にアクセスされた場合の「新規登録処理」
     public function store(Request $request)
     {   
@@ -65,6 +67,15 @@ class TasksController extends Controller
         $request->validate([
             'status' => 'required|max:10',
             ]);
+            
+            
+            
+            //認証済みユーザ（閲覧者）の投稿として作成
+            $request->user()->tasks()->create([
+                'status' => $request->status,
+                'content' => $request->content,
+            ]);
+            
     
         //タスクを作成
         $task = new Task;
@@ -72,14 +83,14 @@ class TasksController extends Controller
         //↓が問題
         //$task->user_id = $request->user_id;
         
+        //Authクラスがログイン認証のクラスの為そこからユーザのidをもらってくる
         $usr_id = \Auth::user()->id;
-        $task->user_id =$usr_id;
         
-        
+        $task->user_id =$usr_id;    //taskテーブルに取ってきたuser_idを格納する
         $task->status = $request->status;
         $task->content = $request->content;
         
-        //logger($task);
+        //logger($task);        //　logs/laravel/logにログを出力する
         
         $task->save();
         
@@ -115,8 +126,18 @@ class TasksController extends Controller
         //idの値でタスクを検索して取得
         $task = Task::findOrFail($id);
         
-        //タスク編集ビューでそれを表示
-        return view('task.edit',['task' => $task]);
+        //logger($task);
+        
+        if( \Auth::id() === $task->user_id){
+            //タスク編集ビューでそれを表示
+            return view('task.edit',['task' => $task]);
+        }
+            
+        
+        
+        //トップページへリダイレクトさせる
+        return redirect('/');
+        
     }
 
     /**
@@ -130,17 +151,19 @@ class TasksController extends Controller
      // putまたはpatchでtask/idにアクセスされた場合の「更新処理」
     public function update(Request $request, $id)
     {   
-        //バリテーション
-        $request->validate([
-            'status' => 'required|max:10',
-            ]);
             
-        //idの値でタスクを検索して取得
-        $task = Task::findOrFail($id);
-        //タスクを更新
-        $task->status = $request->status;
-        $task->content = $request->content;
-        $task->save();
+            //バリテーション
+            $request->validate([
+                'status' => 'required|max:10',
+                ]);
+                
+            //idの値でタスクを検索して取得
+            $task = Task::findOrFail($id);
+            
+            //タスクを更新
+            $task->status = $request->status;
+            $task->content = $request->content;
+            $task->save();
         
         //トップページへリダイレクトさせる
         return redirect('/');
@@ -157,10 +180,17 @@ class TasksController extends Controller
     public function destroy($id)
     {
         //idの値でタスクを検索して取得
-        $task = Task::findOrFail($id);
-        //タスクを削除
-        $task->delete();
+        $task = \App\Task::findOrFail($id);
         
+        if(\Auth::id() === $task->user_id){
+            $task->delete();
+        }
+        
+       
+            //タスクを削除
+           // $task->delete();
+        
+    
         //トップページへリダイレクトさせる
         return redirect('/');
         
